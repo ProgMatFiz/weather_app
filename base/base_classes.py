@@ -7,4 +7,5 @@ class IWeatherSource(ABC):
     def fetch_city_data(self, url):
         pass
 
-
+    def combine_all_data(self):
+        pass
