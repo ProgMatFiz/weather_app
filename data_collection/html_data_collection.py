@@ -7,6 +7,8 @@ from base.base_classes import IWeatherSource
 base_url = "https://meteo.arso.gov.si/met/en/service2/"
 table_url = "observation_si/index.html"
 city_data_url = "history.html"
+
+
 class HtmlDataCollection(IWeatherSource):
     def __init__(self, url: str = base_url):
         self.url = url
@@ -20,8 +22,9 @@ class HtmlDataCollection(IWeatherSource):
         :param url: URL link
         :return full_data_links: list of links of weather data in the last 48 by each city
     '''
+
     def fetch_data(self) -> list[str]:
-        r_main_link = requests.get(self.url,timeout=20)
+        r_main_link = requests.get(self.url, timeout=20)
         r_main_link.raise_for_status()
         list_of_links = html.fromstring(r_main_link.content)
         link = list_of_links.xpath(f"//a[contains(@href,'{table_url}')]/@href")[0]
@@ -51,7 +54,7 @@ class HtmlDataCollection(IWeatherSource):
         df = pd.read_html(url)[0]
         column_names = df.columns.values
         # Extracting data from URL and creating a dataframe
-        r_city_data = requests.get(url,timeout=20)
+        r_city_data = requests.get(url, timeout=20)
         r_city_data.raise_for_status()
         city_data = html.fromstring(r_city_data.content)
         rows = []
@@ -80,6 +83,7 @@ class HtmlDataCollection(IWeatherSource):
         merging separate weather dataframes of every city.
         :return df_all_data: dataframe with columns containing wind, temperature and pressure
     '''
+
     def combine_all_data(self):
         city_data_links = self.fetch_data()
         df = []
@@ -88,9 +92,11 @@ class HtmlDataCollection(IWeatherSource):
             df = self.fetch_city_data(i)
             city_name = df.columns.values[0]
             df.insert(1, "City", city_name)
-            df = df.rename(columns={f"{city_name}": "Date and time"})
+            df.rename(columns={f"{city_name}": "Date and time"}, inplace=True)
             df_all.append(df)
         df_all_data = pd.concat(df_all, ignore_index=True)
+        df_all_data.replace(r'^\s*$', "No data provided", regex=True, inplace=True)
+        df_all_data["Wind"] = df_all_data["Wind"].str.replace(r'(?<=[a-z])(?=[A-Z])', ' ', regex=True)
         return df_all_data
 
     ''' 
@@ -101,6 +107,7 @@ class HtmlDataCollection(IWeatherSource):
     :param df: dataframe
     :return column_list: list of column candidates for presenting weather data
     '''
+
     @staticmethod
     def column_candidates(df) -> list:
         # Column candidate list

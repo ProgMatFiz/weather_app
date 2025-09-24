@@ -1,8 +1,7 @@
-import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
-from data_collection.html_data_collection import HtmlDataCollection
 
+'''Class for defining the model to be presented for the GUI (viewer)'''
 class DataFrameModel(QtCore.QAbstractTableModel):
     def __init__(self, df):
         super().__init__()
@@ -31,21 +30,3 @@ class DataFrameModel(QtCore.QAbstractTableModel):
         self.beginResetModel()
         self._df = df
         self.endResetModel()
-
-
-class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, data):
-        super().__init__()
-        self.data = data
-        self.table = QtWidgets.QTableView()
-        self.model = DataFrameModel(data)
-        self.table.setModel(self.model)
-        self.setCentralWidget(self.table)
-
-
-app = QtWidgets.QApplication(sys.argv)
-reader = HtmlDataCollection()
-data_all = reader.combine_all_data()
-window = MainWindow(data_all)
-window.show()
-app.exec_()
