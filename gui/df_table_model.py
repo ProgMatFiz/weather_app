@@ -1,7 +1,10 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 
-'''Class for defining the model to be presented for the GUI (viewer)'''
+''' Class for defining the data (model) to be presented for the GUI (viewer)
+'''
+
+
 class DataFrameModel(QtCore.QAbstractTableModel):
     def __init__(self, df):
         super().__init__()

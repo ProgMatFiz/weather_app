@@ -8,6 +8,9 @@ base_url = "https://meteo.arso.gov.si/met/en/service2/"
 table_url = "observation_si/index.html"
 city_data_url = "history.html"
 
+''' Class for collecting, formatting and combining all weather data from HTML links
+'''
+
 
 class HtmlDataCollection(IWeatherSource):
     def __init__(self, url: str = base_url):
@@ -24,12 +27,16 @@ class HtmlDataCollection(IWeatherSource):
     '''
 
     def fetch_data(self) -> list[str]:
+
+        # Finding the main link to the table from the given page
         r_main_link = requests.get(self.url, timeout=20)
         r_main_link.raise_for_status()
         list_of_links = html.fromstring(r_main_link.content)
         link = list_of_links.xpath(f"//a[contains(@href,'{table_url}')]/@href")[0]
         full_data_url = urljoin(self.url, link)
-        r_data = requests.get(full_data_url)
+
+        # Finding all the links of data from the table in HTML form
+        r_data = requests.get(full_data_url, timeout=20)
         list_data_links = html.fromstring(r_data.content)
         data_links = list_data_links.xpath(f"//a[contains(@href, '{city_data_url}')]/@href")
         full_data_links = []
@@ -49,15 +56,18 @@ class HtmlDataCollection(IWeatherSource):
         :return df_city_data: dataframe with columns containing wind, temperature and pressure
     '''
 
-    def fetch_city_data(self, url):
+    def fetch_city_data(self, url: str):
         # Saving column names
         df = pd.read_html(url)[0]
         column_names = df.columns.values
+
         # Extracting data from URL and creating a dataframe
         r_city_data = requests.get(url, timeout=20)
         r_city_data.raise_for_status()
         city_data = html.fromstring(r_city_data.content)
         rows = []
+
+        # Going through the td content
         for tr in city_data.xpath("//table//tr[td]"):
             tds = tr.xpath("./td")
             if not tds:
@@ -66,6 +76,7 @@ class HtmlDataCollection(IWeatherSource):
             for td in tds:
                 img = td.xpath(".//img/@src")
                 if img:
+                    # Extracting wind data (lightSE, modSW for example)
                     val = img[0].split("/")[-1].replace(".png", "")
                 else:
                     val = td.text_content().strip()
@@ -85,6 +96,8 @@ class HtmlDataCollection(IWeatherSource):
     '''
 
     def combine_all_data(self):
+
+        # Fetching city data links
         city_data_links = self.fetch_data()
         df = []
         df_all = []
@@ -94,6 +107,7 @@ class HtmlDataCollection(IWeatherSource):
             df.insert(1, "City", city_name)
             df.rename(columns={f"{city_name}": "Date and time"}, inplace=True)
             df_all.append(df)
+        # Forming full data frame
         df_all_data = pd.concat(df_all, ignore_index=True)
         df_all_data.replace(r'^\s*$', "No data provided", regex=True, inplace=True)
         df_all_data["Wind"] = df_all_data["Wind"].str.replace(r'(?<=[a-z])(?=[A-Z])', ' ', regex=True)
@@ -109,7 +123,7 @@ class HtmlDataCollection(IWeatherSource):
     '''
 
     @staticmethod
-    def column_candidates(df) -> list:
+    def column_candidates(df: pd.DataFrame) -> list:
         # Column candidate list
         candidates = ["wind", "temperature", "pressure"]
         column_names = df.columns.values
