@@ -1,37 +1,45 @@
-import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QTableView, QMainWindow
-from df_table_model import DataFrameModel
-from data_collection.html_data_collection import HtmlDataCollection
+import pandas as pd
+from base.base_classes import IGUI
+from gui.df_table_model import DataFrameModel
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QTableView, QApplication
 
-'''Class for presenting the MainWindow for viewing the data (model)'''
-class MainWindow(QMainWindow):
-    def __init__(self, data):
-        super().__init__()
-        self.data = data
-        self.table = QTableView()
-        self.model = DataFrameModel(data)
-        self.table.setModel(self.model)
+''' Class for presenting the MainWindow for viewing the data (model)
+'''
 
+
+class GUI(IGUI):
+    def __init__(self):
+
+        # Application has to be created before widget otherwise it won't run
+        self.app = QApplication([])
+        self.widget = QWidget()
+        self.widget.setWindowTitle("Weather forecast")
+        self.widget.resize(1000,1000)
+
+        # Setting the widgets and layout
         button = QPushButton("Refresh data")
         self.btn = button
+        self.table = QTableView()
+        self.model = DataFrameModel(pd.DataFrame())
+        self.table.setModel(self.model)
 
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+        layout = QVBoxLayout(self.widget)
         layout.addWidget(self.btn)
         layout.addWidget(self.table)
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
 
-        self.btn.clicked.connect(self.refresh_data)
+        self.refresh_handle = None
+        self.btn.clicked.connect(self.handle_data_refresh)
 
-    def refresh_data(self):
-        self.model.set_df(self.data)
+    def refresh_data(self, handler):
+        self.refresh_handle = handler
 
+    def show_data(self, data: pd.DataFrame):
+        self.model.set_df(data)
 
-app = QtWidgets.QApplication(sys.argv)
-reader = HtmlDataCollection()
-data_all = reader.combine_all_data()
-window = MainWindow(data_all)
-window.show()
-app.exec_()
+    def run_app(self):
+        self.widget.show()
+        self.app.exec_()
+
+    def handle_data_refresh(self):
+        if self.refresh_handle:
+            self.refresh_handle()
