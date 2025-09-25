@@ -1,17 +1,16 @@
 # Current progress
 
-### Added directory
+### Finished
 
-Data collection has been added 
-
-What can be refactored/added
-- data clean up for weather column
-- grouping the final table by date
+- Data collection
+- Model, View and Controller
+- main.py
 
 ### TODO
 
-Create GUI directory
-- Table model
-- GUI view
+Data Collection directory
+- fix reading pressure values where * is present
+- fix when link changes, search not for index.html links but for an active link
+- add error cases
 
 
