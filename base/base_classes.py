@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 
-''' Abstract class for the model (source data)
+''' Abstract class for the model (data)
 '''
 
 

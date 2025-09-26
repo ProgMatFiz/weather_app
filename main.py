@@ -4,9 +4,12 @@ from app.controller import Controller
 
 
 def main():
+    # Defining the model view and controller
     model = HtmlDataCollection()
     view = GUI()
     Controller(view, model)
+
+    # Running the GUI
     view.run_app()
 
 
