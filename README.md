@@ -1,8 +1,10 @@
 ### Weather App
 
 The Weather App is meant to present weather data of wind, pressure and temperature
-of a given data set via an URL link in the last 48 hours. The base URL is meant for>
+of a given data set via an URL link in the last 48 hours. The base URL is meant for
 presenting data in the last 48 hours for all Slovenian cities.
+When the App is run the starting representation is an empty table.
+The user has to click on "Refresh data" to view the newest weather data.
 
 ### Build
 
