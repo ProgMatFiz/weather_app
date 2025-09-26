@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 
-''' Abstract class for the model (data)
-'''
+""" 
+Abstract class for the model (data)
+"""
 
 
 class IWeatherSource(ABC):
@@ -19,8 +20,9 @@ class IWeatherSource(ABC):
         pass
 
 
-''' Abstract class for the view (GUI)
-'''
+"""
+Abstract class for the view (GUI)
+"""
 
 
 class IGUI(ABC):

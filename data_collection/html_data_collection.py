@@ -8,26 +8,27 @@ base_url = "https://meteo.arso.gov.si/met/en/service2/"
 table_url = "observation_si/index.html"
 city_data_url = "history.html"
 
-''' Class for collecting, formatting and combining all weather data from HTML links
-'''
+"""
+Class for collecting, formatting and combining all weather data from HTML links
+"""
 
 
 class HtmlDataCollection(IWeatherSource):
     def __init__(self, url: str = base_url):
         self.url = url
 
-    ''' Function fetch_data fetches the data from a given URL.
-        The function finds first the link to the page of table
-        with the data of the weather for all the cities.
-        Then from this, the function finds the separate links
-        for each city with the weather data in the last 48h and
-        saves them in a list.
-        :param url: URL link
-        :return full_data_links: list of links of weather data in the last 48 by each city
-    '''
-
     @property
     def fetch_data(self) -> list[str]:
+
+        """ Function fetch_data fetches the data from a given URL.
+            The function finds first the link to the page of table
+            with the data of the weather for all the cities.
+            Then from this, the function finds the separate links
+            for each city with the weather data in the last 48h and
+            saves them in a list.
+
+            :return full_data_links: list of links of weather data in the last 48 by each city
+        """
 
         try:
             # Finding the main link to the table from the given page
@@ -49,19 +50,19 @@ class HtmlDataCollection(IWeatherSource):
         except requests.exceptions.HTTPError as error:
             print("An HTTP error occurred: ", error)
 
-    ''' Function that creates a DataFrame for a city from a provided url (HTML link).
-        The function goes through the HTML and saves data by row.
-        Since the wind and cloud cover columns are presented with mini icons and not text,
-        the function has to iterate through the HTML file in order to save
-        these parameters in text form (looking at rows of <img src).
-        The function additionally processes and returns the processed DataFrame 
-        with columns where temperature, wind and pressure are present.
-        
-        :param url: city URL (HTML link)
-        :return df_city_data: DataFrame with columns containing wind, temperature and pressure
-    '''
-
     def fetch_city_data(self, url: str):
+
+        """ Function that creates a DataFrame for a city from a provided url (HTML link).
+            The function goes through the HTML and saves data by row.
+            Since the wind and cloud cover columns are presented with mini icons and not text,
+            the function has to iterate through the HTML file in order to save
+            these parameters in text form (looking at rows of <img src).
+            The function additionally processes and returns the processed DataFrame
+            with columns where temperature, wind and pressure are present.
+
+            :param url: city URL (HTML link)
+            :return df_city_data: DataFrame with columns containing wind, temperature and pressure
+        """
 
         # Saving column names
         df = pd.read_html(url)[0]
@@ -97,16 +98,15 @@ class HtmlDataCollection(IWeatherSource):
         except requests.exceptions.HTTPError as error:
             print("An HTTP error occurred: ", error)
 
-    ''' Function that creates a joint DataFrame for all weather data from every city.
-        The function iterates through the list of links of weather data for each city
-        and it adds an extra column for city names. The final DataFrame is created by
-        merging separate weather DataFrames of every city.
-        
-        :return df_all_data: DataFrame with columns containing wind, temperature and pressure
-    '''
-
     def combine_all_data(self):
 
+        """ Function that creates a joint DataFrame for all weather data from every city.
+            The function iterates through the list of links of weather data for each city,
+            and it adds an extra column for city names. The final DataFrame is created by
+            merging separate weather DataFrames of every city.
+
+            :return df_all_data: DataFrame with columns containing wind, temperature and pressure
+        """
         # Fetching city data links
         city_data_links = self.fetch_data
         df = []
@@ -123,17 +123,16 @@ class HtmlDataCollection(IWeatherSource):
         df_all_data["Wind"] = df_all_data["Wind"].str.replace(r'(?<=[a-z])(?=[A-Z])', ' ', regex=True)
         return df_all_data
 
-    ''' 
-    Function that returns column candidates of a DataFrame for presenting
-    weather data in the last 48 hours. The function accepts
-    the DataFrame as a parameter.
-    
-    :param df: DataFrame
-    :return column_list: list of column candidates for presenting weather data
-    '''
-
     @staticmethod
     def column_candidates(df: pd.DataFrame) -> list:
+
+        """ Function that returns column candidates of a DataFrame for presenting
+            weather data in the last 48 hours. The function accepts
+            the DataFrame as a parameter.
+
+            :param df: DataFrame
+            :return column_list: list of column candidates for presenting weather data
+       """
         # Column candidate list
         candidates = ["wind", "temperature", "pressure"]
         column_names = df.columns.values

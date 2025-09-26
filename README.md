@@ -8,7 +8,9 @@ presenting data in the last 48 hours for all Slovenian cities.
 
 To build the app the user needs to install the reqired packages as so:
 
+~~~bash
 pip install -r requirements.txt
+~~~
 
 Should you need any additional packages it is reccommended to create
 your own virtual environment and install them there.
@@ -17,7 +19,9 @@ your own virtual environment and install them there.
 
 To run the program simply type in the terminal:
 
+~~~bash
 python3 main.py
+~~~
 
 ### Further development
 
